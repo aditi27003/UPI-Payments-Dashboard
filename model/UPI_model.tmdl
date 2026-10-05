@@ -1,0 +1,484 @@
+createOrReplace
+
+	table Date_Table
+		dataCategory: Time
+
+		column Date
+			dataType: dateTime
+			isKey
+			formatString: mmm yyyy
+			summarizeBy: none
+			sourceColumn: Date
+
+		column Year
+			dataType: int64
+			formatString: 0
+			summarizeBy: none
+			sourceColumn: Year
+
+		column MonthNo
+			dataType: int64
+			formatString: 0
+			summarizeBy: none
+			sourceColumn: MonthNo
+
+		column Month
+			dataType: string
+			summarizeBy: none
+			sourceColumn: Month
+			sortByColumn: MonthNo
+
+		column MonthYear
+			dataType: string
+			summarizeBy: none
+			sourceColumn: MonthYear
+			sortByColumn: YearMonthKey
+
+		column YearMonthKey
+			dataType: int64
+			formatString: 0
+			summarizeBy: none
+			sourceColumn: YearMonthKey
+
+		column FY
+			dataType: string
+			summarizeBy: none
+			sourceColumn: FY
+
+		column FYQuarter
+			dataType: string
+			summarizeBy: none
+			sourceColumn: FYQuarter
+
+		partition Date_Table = m
+			mode: import
+			source =
+					let
+					    Source = Excel.Workbook(File.Contents("C:\Users\aditi\Documents\UPI Power BI Project\UPI_Data.xlsx"), null, true),
+					    Sheet = Source{[Item="Date_Table",Kind="Sheet"]}[Data],
+					    Promoted = Table.PromoteHeaders(Sheet, [PromoteAllScalars=true]),
+					    Typed = Table.TransformColumnTypes(Promoted, {{"Date", type date}, {"Year", Int64.Type}, {"MonthNo", Int64.Type}, {"Month", type text}, {"MonthYear", type text}, {"YearMonthKey", Int64.Type}, {"FY", type text}, {"FYQuarter", type text}})
+					in
+					    Typed
+
+	table Monthly_Totals
+
+		measure 'UPI Volume (Bn)' = DIVIDE(SUM(Monthly_Totals[Volume_Mn]),1000)
+			formatString: #,0.00
+
+		measure 'UPI Value (₹ Lakh Cr)' = DIVIDE(SUM(Monthly_Totals[Value_Cr]),100000)
+			formatString: #,0.00
+
+		measure 'Avg Ticket Size (₹)' = DIVIDE(SUM(Monthly_Totals[Value_Cr])*10000000, SUM(Monthly_Totals[Volume_Mn])*1000000)
+			formatString: ₹#,0
+
+		measure 'Latest Month' = FORMAT(MAX(Monthly_Totals[Date]),"MMM yyyy")
+
+		measure 'Monthly Txns (Bn)' =
+				VAR d = CALCULATE(MAX(Monthly_Totals[Date]))
+				RETURN CALCULATE(SUM(Monthly_Totals[Volume_Mn]), ALL(Date_Table), ALL(Monthly_Totals), Monthly_Totals[Date] = d)/1000
+			formatString: #,0.00
+
+		measure 'Monthly Value (₹ Lakh Cr)' =
+				VAR d = CALCULATE(MAX(Monthly_Totals[Date]))
+				RETURN CALCULATE(SUM(Monthly_Totals[Value_Cr]), ALL(Date_Table), ALL(Monthly_Totals), Monthly_Totals[Date] = d)/100000
+			formatString: #,0.00
+
+		measure 'YoY Volume Growth %' =
+				VAR d = CALCULATE(MAX(Monthly_Totals[Date]))
+				VAR c = CALCULATE(SUM(Monthly_Totals[Volume_Mn]), ALL(Date_Table), ALL(Monthly_Totals), Monthly_Totals[Date] = d)
+				VAR p = CALCULATE(SUM(Monthly_Totals[Volume_Mn]), ALL(Date_Table), ALL(Monthly_Totals), Monthly_Totals[Date] = EDATE(d,-12))
+				RETURN DIVIDE(c-p,p)
+			formatString: 0.0%
+
+		measure 'YoY Value Growth %' =
+				VAR d = CALCULATE(MAX(Monthly_Totals[Date]))
+				VAR c = CALCULATE(SUM(Monthly_Totals[Value_Cr]), ALL(Date_Table), ALL(Monthly_Totals), Monthly_Totals[Date] = d)
+				VAR p = CALCULATE(SUM(Monthly_Totals[Value_Cr]), ALL(Date_Table), ALL(Monthly_Totals), Monthly_Totals[Date] = EDATE(d,-12))
+				RETURN DIVIDE(c-p,p)
+			formatString: 0.0%
+
+		measure 'Banks Live on UPI' =
+				VAR d = CALCULATE(MAX(Monthly_Totals[Date]))
+				RETURN CALCULATE(MAX(Monthly_Totals[BanksLive]), ALL(Date_Table), ALL(Monthly_Totals), Monthly_Totals[Date] = d)
+			formatString: #,0
+
+		measure 'Latest Avg Ticket (₹)' =
+				VAR d = CALCULATE(MAX(Monthly_Totals[Date]))
+				RETURN CALCULATE([Avg Ticket Size (₹)], ALL(Date_Table), ALL(Monthly_Totals), Monthly_Totals[Date] = d)
+			formatString: ₹#,0
+
+		column Date
+			dataType: dateTime
+			formatString: dd mmm yyyy
+			summarizeBy: none
+			sourceColumn: Date
+
+		column FinancialYear
+			dataType: string
+			summarizeBy: none
+			sourceColumn: FinancialYear
+
+		column BanksLive
+			dataType: int64
+			formatString: #,0
+			summarizeBy: none
+			sourceColumn: BanksLive
+
+		column Volume_Mn
+			dataType: double
+			formatString: #,0.00
+			summarizeBy: sum
+			sourceColumn: Volume_Mn
+
+		column Value_Cr
+			dataType: double
+			formatString: #,0.00
+			summarizeBy: sum
+			sourceColumn: Value_Cr
+
+		column AvgTicket_Rs
+			dataType: double
+			formatString: #,0
+			summarizeBy: none
+			sourceColumn: AvgTicket_Rs
+
+		partition Monthly_Totals = m
+			mode: import
+			source =
+					let
+					    Source = Excel.Workbook(File.Contents("C:\Users\aditi\Documents\UPI Power BI Project\UPI_Data.xlsx"), null, true),
+					    Sheet = Source{[Item="Monthly_Totals",Kind="Sheet"]}[Data],
+					    Promoted = Table.PromoteHeaders(Sheet, [PromoteAllScalars=true]),
+					    Typed = Table.TransformColumnTypes(Promoted, {{"Date", type date}, {"FinancialYear", type text}, {"BanksLive", Int64.Type}, {"Volume_Mn", type number}, {"Value_Cr", type number}, {"AvgTicket_Rs", type number}})
+					in
+					    Typed
+
+	table App_Share
+
+		measure 'App Volume (Mn)' = SUM(App_Share[Volume_Mn])
+			formatString: #,0
+
+		measure 'App Volume Share %' = DIVIDE(SUM(App_Share[Volume_Mn]), CALCULATE(SUM(App_Share[Volume_Mn]), ALL(App_Share[App], App_Share[Category])))
+			formatString: 0.0%
+
+		measure 'App Value Share %' = DIVIDE(SUM(App_Share[Value_Cr]), CALCULATE(SUM(App_Share[Value_Cr]), ALL(App_Share[App], App_Share[Category])))
+			formatString: 0.0%
+
+		measure 'Key App Share %' = IF(SELECTEDVALUE(App_Share[App]) IN {"PhonePe","Google Pay","Paytm","Navi","super.money","BHIM"}, [App Volume Share %])
+			formatString: 0.0%
+
+		measure 'Latest App Volume (Mn)' =
+				VAR d = CALCULATE(MAX(App_Share[Date]), ALL(App_Share[App], App_Share[Category]))
+				RETURN CALCULATE(SUM(App_Share[Volume_Mn]), App_Share[Date] = d)
+			formatString: #,0
+
+		measure 'Latest App Share %' =
+				VAR d = CALCULATE(MAX(App_Share[Date]), ALL(App_Share[App], App_Share[Category]))
+				RETURN DIVIDE(CALCULATE(SUM(App_Share[Volume_Mn]), App_Share[Date] = d), CALCULATE(SUM(App_Share[Volume_Mn]), ALL(App_Share[App], App_Share[Category]), App_Share[Date] = d))
+			formatString: 0.0%
+
+		measure 'App YoY Growth %' =
+				VAR d = CALCULATE(MAX(App_Share[Date]), ALL(App_Share[App], App_Share[Category]))
+				VAR c = CALCULATE(SUM(App_Share[Volume_Mn]), ALL(Date_Table), App_Share[Date] = d)
+				VAR p = CALCULATE(SUM(App_Share[Volume_Mn]), ALL(Date_Table), App_Share[Date] = EDATE(d,-12))
+				RETURN DIVIDE(c-p,p)
+			formatString: 0.0%
+
+		measure 'PhonePe + GPay Share %' =
+				VAR d = CALCULATE(MAX(App_Share[Date]), ALL(App_Share[App], App_Share[Category]))
+				RETURN DIVIDE(CALCULATE(SUM(App_Share[Volume_Mn]), App_Share[App] IN {"PhonePe","Google Pay"}, App_Share[Date] = d), CALCULATE(SUM(App_Share[Volume_Mn]), ALL(App_Share[App], App_Share[Category]), App_Share[Date] = d))
+			formatString: 0.0%
+
+		column Date
+			dataType: dateTime
+			formatString: dd mmm yyyy
+			summarizeBy: none
+			sourceColumn: Date
+
+		column App
+			dataType: string
+			summarizeBy: none
+			sourceColumn: App
+
+		column Volume_Mn
+			dataType: double
+			formatString: #,0.00
+			summarizeBy: sum
+			sourceColumn: Volume_Mn
+
+		column Value_Cr
+			dataType: double
+			formatString: #,0
+			summarizeBy: sum
+			sourceColumn: Value_Cr
+
+		column Category
+			dataType: string
+			summarizeBy: none
+			sourceColumn: Category
+
+		partition App_Share = m
+			mode: import
+			source =
+					let
+					    Source = Excel.Workbook(File.Contents("C:\Users\aditi\Documents\UPI Power BI Project\UPI_Data.xlsx"), null, true),
+					    Sheet = Source{[Item="App_Share",Kind="Sheet"]}[Data],
+					    Promoted = Table.PromoteHeaders(Sheet, [PromoteAllScalars=true]),
+					    Typed = Table.TransformColumnTypes(Promoted, {{"Date", type date}, {"App", type text}, {"Volume_Mn", type number}, {"Value_Cr", type number}, {"Category", type text}})
+					in
+					    Typed
+
+	table P2P_P2M
+
+		measure 'Txn Volume (Bn)' = DIVIDE(SUM(P2P_P2M[Volume_Mn]),1000)
+			formatString: #,0.00
+
+		measure 'P2M Share of Volume %' = DIVIDE(CALCULATE(SUM(P2P_P2M[Volume_Mn]), P2P_P2M[TxnType] = "P2M (Person to Merchant)"), CALCULATE(SUM(P2P_P2M[Volume_Mn]), ALL(P2P_P2M[TxnType])))
+			formatString: 0.0%
+
+		measure 'Avg Ticket by Type (₹)' = DIVIDE(SUM(P2P_P2M[Value_Cr])*10000000, SUM(P2P_P2M[Volume_Mn])*1000000)
+			formatString: ₹#,0
+
+		column Date
+			dataType: dateTime
+			formatString: dd mmm yyyy
+			summarizeBy: none
+			sourceColumn: Date
+
+		column TxnType
+			dataType: string
+			summarizeBy: none
+			sourceColumn: TxnType
+
+		column Volume_Mn
+			dataType: double
+			formatString: #,0.00
+			summarizeBy: sum
+			sourceColumn: Volume_Mn
+
+		column Value_Cr
+			dataType: double
+			formatString: #,0.00
+			summarizeBy: sum
+			sourceColumn: Value_Cr
+
+		partition P2P_P2M = m
+			mode: import
+			source =
+					let
+					    Source = Excel.Workbook(File.Contents("C:\Users\aditi\Documents\UPI Power BI Project\UPI_Data.xlsx"), null, true),
+					    Sheet = Source{[Item="P2P_P2M",Kind="Sheet"]}[Data],
+					    Promoted = Table.PromoteHeaders(Sheet, [PromoteAllScalars=true]),
+					    Typed = Table.TransformColumnTypes(Promoted, {{"Date", type date}, {"TxnType", type text}, {"Volume_Mn", type number}, {"Value_Cr", type number}})
+					in
+					    Typed
+
+	table Top_Banks
+
+		measure 'Bank Volume Latest (Mn)' =
+				VAR d = CALCULATE(MAX(Top_Banks[Date]), ALL(Top_Banks))
+				RETURN CALCULATE(SUM(Top_Banks[Volume_Mn]), ALL(Date_Table), Top_Banks[Date] = d)
+			formatString: #,0
+
+		measure 'Bank Value Latest (₹ Cr)' =
+				VAR d = CALCULATE(MAX(Top_Banks[Date]), ALL(Top_Banks))
+				RETURN CALCULATE(SUM(Top_Banks[Value_Cr]), ALL(Date_Table), Top_Banks[Date] = d)
+			formatString: #,0
+
+		measure 'Bank YoY Growth %' =
+				VAR d = CALCULATE(MAX(Top_Banks[Date]), ALL(Top_Banks))
+				VAR c = CALCULATE(SUM(Top_Banks[Volume_Mn]), ALL(Date_Table), Top_Banks[Date] = d)
+				VAR p = CALCULATE(SUM(Top_Banks[Volume_Mn]), ALL(Date_Table), Top_Banks[Date] = EDATE(d,-12))
+				RETURN IF(NOT ISBLANK(p), DIVIDE(c-p,p))
+			formatString: 0.0%
+
+		measure 'Bank Share of UPI %' =
+				VAR d = CALCULATE(MAX(Top_Banks[Date]), ALL(Top_Banks))
+				RETURN DIVIDE(CALCULATE(SUM(Top_Banks[Volume_Mn]), ALL(Date_Table), Top_Banks[Date] = d), CALCULATE(SUM(Monthly_Totals[Volume_Mn]), ALL(Date_Table), ALL(Monthly_Totals), Monthly_Totals[Date] = d))
+			formatString: 0.0%
+
+		measure 'Bank Avg Ticket (₹)' =
+				VAR d = CALCULATE(MAX(Top_Banks[Date]), ALL(Top_Banks))
+				RETURN DIVIDE(CALCULATE(SUM(Top_Banks[Value_Cr]), ALL(Date_Table), Top_Banks[Date] = d)*10000000, CALCULATE(SUM(Top_Banks[Volume_Mn]), ALL(Date_Table), Top_Banks[Date] = d)*1000000)
+			formatString: ₹#,0
+
+		column Date
+			dataType: dateTime
+			formatString: dd mmm yyyy
+			summarizeBy: none
+			sourceColumn: Date
+
+		column Rank
+			dataType: int64
+			formatString: 0
+			summarizeBy: none
+			sourceColumn: Rank
+
+		column Bank
+			dataType: string
+			summarizeBy: none
+			sourceColumn: Bank
+
+		column BankType
+			dataType: string
+			summarizeBy: none
+			sourceColumn: BankType
+
+		column Volume_Mn
+			dataType: double
+			formatString: #,0.00
+			summarizeBy: sum
+			sourceColumn: Volume_Mn
+
+		column Value_Cr
+			dataType: double
+			formatString: #,0.00
+			summarizeBy: sum
+			sourceColumn: Value_Cr
+
+		partition Top_Banks = m
+			mode: import
+			source =
+					let
+					    Source = Excel.Workbook(File.Contents("C:\Users\aditi\Documents\UPI Power BI Project\UPI_Data.xlsx"), null, true),
+					    Sheet = Source{[Item="Top_Banks",Kind="Sheet"]}[Data],
+					    Promoted = Table.PromoteHeaders(Sheet, [PromoteAllScalars=true]),
+					    Typed = Table.TransformColumnTypes(Promoted, {{"Date", type date}, {"Rank", Int64.Type}, {"Bank", type text}, {"BankType", type text}, {"Volume_Mn", type number}, {"Value_Cr", type number}})
+					in
+					    Typed
+
+	table States
+
+		measure 'State Volume Latest (Mn)' =
+				VAR d = CALCULATE(MAX(States[Date]), ALL(States))
+				RETURN IF(SELECTEDVALUE(States[State]) = "Unclassified", BLANK(), CALCULATE(SUM(States[Volume_Mn]), ALL(Date_Table), States[Date] = d))
+			formatString: #,0
+
+		measure 'State YoY Growth %' =
+				VAR d = CALCULATE(MAX(States[Date]), ALL(States))
+				VAR c = CALCULATE(SUM(States[Volume_Mn]), ALL(Date_Table), States[Date] = d)
+				VAR p = CALCULATE(SUM(States[Volume_Mn]), ALL(Date_Table), States[Date] = EDATE(d,-12))
+				RETURN IF(SELECTEDVALUE(States[State]) = "Unclassified", BLANK(), DIVIDE(c-p,p))
+			formatString: 0.0%
+
+		measure 'State Share (Mapped) %' =
+				VAR d = CALCULATE(MAX(States[Date]), ALL(States))
+				RETURN IF(SELECTEDVALUE(States[State]) = "Unclassified", BLANK(), DIVIDE(CALCULATE(SUM(States[Volume_Mn]), ALL(Date_Table), States[Date] = d), CALCULATE(SUM(States[Volume_Mn]), ALL(Date_Table), ALL(States[State]), States[State] <> "Unclassified", States[Date] = d)))
+			formatString: 0.0%
+
+		measure 'State Avg Ticket (₹)' =
+				VAR d = CALCULATE(MAX(States[Date]), ALL(States))
+				RETURN IF(SELECTEDVALUE(States[State]) = "Unclassified", BLANK(), DIVIDE(CALCULATE(SUM(States[Value_Cr]), ALL(Date_Table), States[Date] = d)*10000000, CALCULATE(SUM(States[Volume_Mn]), ALL(Date_Table), States[Date] = d)*1000000))
+			formatString: ₹#,0
+
+		column Date
+			dataType: dateTime
+			formatString: dd mmm yyyy
+			summarizeBy: none
+			sourceColumn: Date
+
+		column State
+			dataType: string
+			summarizeBy: none
+			sourceColumn: State
+			dataCategory: StateOrProvince
+
+		column Volume_Mn
+			dataType: double
+			formatString: #,0.00
+			summarizeBy: sum
+			sourceColumn: Volume_Mn
+
+		column Value_Cr
+			dataType: double
+			formatString: #,0
+			summarizeBy: sum
+			sourceColumn: Value_Cr
+
+		partition States = m
+			mode: import
+			source =
+					let
+					    Source = Excel.Workbook(File.Contents("C:\Users\aditi\Documents\UPI Power BI Project\UPI_Data.xlsx"), null, true),
+					    Sheet = Source{[Item="States",Kind="Sheet"]}[Data],
+					    Promoted = Table.PromoteHeaders(Sheet, [PromoteAllScalars=true]),
+					    Typed = Table.TransformColumnTypes(Promoted, {{"Date", type date}, {"State", type text}, {"Volume_Mn", type number}, {"Value_Cr", type number}})
+					in
+					    Typed
+
+	table Merchant_Categories
+
+		measure 'Merchant Volume (Mn)' = IF(SELECTEDVALUE(Merchant_Categories[MCC]) = "0000", BLANK(), SUM(Merchant_Categories[Volume_Mn]))
+			formatString: #,0
+
+		measure 'Merchant Avg Ticket (₹)' = IF(SELECTEDVALUE(Merchant_Categories[MCC]) = "0000", BLANK(), DIVIDE(SUM(Merchant_Categories[Value_Cr])*10000000, SUM(Merchant_Categories[Volume_Mn])*1000000))
+			formatString: ₹#,0
+
+		column Date
+			dataType: dateTime
+			formatString: dd mmm yyyy
+			summarizeBy: none
+			sourceColumn: Date
+
+		column Tier
+			dataType: string
+			summarizeBy: none
+			sourceColumn: Tier
+
+		column MCC
+			dataType: string
+			summarizeBy: none
+			sourceColumn: MCC
+
+		column Category
+			dataType: string
+			summarizeBy: none
+			sourceColumn: Category
+
+		column Volume_Mn
+			dataType: double
+			formatString: #,0.00
+			summarizeBy: sum
+			sourceColumn: Volume_Mn
+
+		column Value_Cr
+			dataType: double
+			formatString: #,0.00
+			summarizeBy: sum
+			sourceColumn: Value_Cr
+
+		partition Merchant_Categories = m
+			mode: import
+			source =
+					let
+					    Source = Excel.Workbook(File.Contents("C:\Users\aditi\Documents\UPI Power BI Project\UPI_Data.xlsx"), null, true),
+					    Sheet = Source{[Item="Merchant_Categories",Kind="Sheet"]}[Data],
+					    Promoted = Table.PromoteHeaders(Sheet, [PromoteAllScalars=true]),
+					    Typed = Table.TransformColumnTypes(Promoted, {{"Date", type date}, {"Tier", type text}, {"MCC", type text}, {"Category", type text}, {"Volume_Mn", type number}, {"Value_Cr", type number}})
+					in
+					    Typed
+
+	relationship rel_Monthly_Totals_Date
+		fromColumn: Monthly_Totals.Date
+		toColumn: Date_Table.Date
+
+	relationship rel_App_Share_Date
+		fromColumn: App_Share.Date
+		toColumn: Date_Table.Date
+
+	relationship rel_P2P_P2M_Date
+		fromColumn: P2P_P2M.Date
+		toColumn: Date_Table.Date
+
+	relationship rel_Top_Banks_Date
+		fromColumn: Top_Banks.Date
+		toColumn: Date_Table.Date
+
+	relationship rel_States_Date
+		fromColumn: States.Date
+		toColumn: Date_Table.Date
+
+	relationship rel_Merchant_Categories_Date
+		fromColumn: Merchant_Categories.Date
+		toColumn: Date_Table.Date
