@@ -1,0 +1,75 @@
+2026-Aug|1|State Bank of India|6214.93|764572.56
+2026-Aug|2|HDFC Bank Ltd.|1662.54|308268.3
+2026-Aug|3|Bank of Baroda|1578.24|173647.24
+2026-Aug|4|Union Bank of India|1433.41|167578.93
+2026-Aug|5|Punjab National Bank|1367.31|147258.8
+2026-Aug|6|Canara Bank|1157.56|146688.96
+2026-Aug|7|Kotak Mahindra Bank|1077.03|113756.92
+2026-Aug|8|Axis Bank Ltd.|994.04|154744.99
+2026-Aug|9|ICICI Bank Ltd.|789.07|141712.7
+2026-Aug|10|India Post Payments Bank Limited|773.71|36945.91
+2026-Aug|11|Indian Bank|766.36|81329.11
+2026-Aug|12|Bank Of India|717.63|85480.11
+2026-Aug|13|Airtel Payments Bank Limited|590|30424.4
+2026-Aug|14|Indian Overseas Bank|436.84|50627.94
+2026-Aug|15|Central Bank of India|402.06|48493.18
+2026-Aug|16|UCO Bank|326.36|31302.08
+2026-Aug|17|Federal Bank Ltd.|280.23|38733.65
+2026-Aug|18|Bank of Maharashtra|248.15|27533.68
+2026-Aug|19|Indusind Bank Ltd.|233.56|30136.32
+2026-Aug|20|Fino Payments Bank Ltd.|231.75|11022.64
+2026-Aug|21|IDBI Bank Ltd.|220.35|35414.16
+2026-Aug|22|Tri O Tech Solutions Private Limited|219.49|2903.7
+2026-Aug|23|IDFC Bank Ltd.|167.26|24803.34
+2026-Aug|24|Yes Bank Ltd.|163.96|25281.25
+2026-Aug|25|Karnataka Bank Ltd.|153.44|19821.29
+2025-Aug|1|State Bank of India|5028.23|645449.35
+2025-Aug|2|HDFC Bank Ltd.|1505.6|271839.67
+2025-Aug|3|Bank of Baroda|1252.33|146855.3
+2025-Aug|4|Union Bank of India|1137.4|135182.55
+2025-Aug|5|Punjab National Bank|1031.74|120816.76
+2025-Aug|6|Kotak Mahindra Bank|903.74|90254.23
+2025-Aug|7|Canara Bank|900.06|111941.58
+2025-Aug|8|Axis Bank Ltd.|857.34|132181.73
+2025-Aug|9|ICICI Bank Ltd.|720.07|120673.56
+2025-Aug|10|Indian Bank|608.41|67202.21
+2025-Aug|11|India Post Payments Bank Limited|593.13|28430.84
+2025-Aug|12|Airtel Payments Bank Limited|546.96|26365.24
+2025-Aug|13|Bank Of India|538.13|67559.65
+2025-Aug|14|Indian Overseas Bank|306.55|37092.74
+2025-Aug|15|Central Bank of India|280.42|37502.03
+2025-Aug|16|UCO Bank|260.35|25969.2
+2025-Aug|17|Federal Bank Ltd.|247.07|31942.03
+2025-Aug|18|Bank of Maharashtra|204.89|22488.35
+2025-Aug|19|Fino Payments Bank Ltd.|204.62|9333.07
+2025-Aug|20|IDBI Bank Ltd.|191.78|30546.84
+2025-Aug|21|Indusind Bank Ltd.|184.29|24643.23
+2025-Aug|22|Yes Bank Ltd.|142.82|23884.8
+2025-Aug|23|Tri O Tech Solutions Private Limited|134.92|1685.09
+2025-Aug|24|Karnataka Bank|131.8|16675.1
+2025-Aug|25|IDFC Bank Ltd.|112.81|18461.31
+2024-Aug|1|State Bank of India|3825.45|549649.2
+2024-Aug|2|HDFC Bank Ltd.|1210.66|227917.92
+2024-Aug|3|Bank of Baroda|911.45|118079.83
+2024-Aug|4|Union Bank of India|880.84|114603.61
+2024-Aug|5|Punjab National Bank|768.11|103237.27
+2024-Aug|6|Kotak Mahindra Bank|714.45|76094.14
+2024-Aug|7|Axis Bank Ltd.|697.4|112518.31
+2024-Aug|8|Canara Bank|672.62|89066.72
+2024-Aug|9|ICICI Bank Ltd.|623.71|118549.43
+2024-Aug|10|Bank Of India|448.88|59470.28
+2024-Aug|11|Indian Bank|434.52|53066.78
+2024-Aug|12|Airtel Payments Bank Limited|394.17|20822.32
+2024-Aug|13|India Post Payments Bank Limited|308.64|15000.96
+2024-Aug|14|Federal Bank Ltd.|208.58|26407.08
+2024-Aug|15|Indian Overseas Bank|201.45|26849.49
+2024-Aug|16|Central Bank of India|192.88|29456.77
+2024-Aug|17|UCO Bank|185.35|20234.66
+2024-Aug|18|IDBI Bank Ltd.|156.88|26461.13
+2024-Aug|19|Bank of Maharashtra|152.72|17669.16
+2024-Aug|20|Indusind Bank Ltd.|144.27|21519.9
+2024-Aug|21|Fino Payments Bank Ltd.|140.45|6480.65
+2024-Aug|22|Karnataka Bank|109.18|14659.56
+2024-Aug|23|Yes Bank Ltd.|106.22|21704
+2024-Aug|24|IDFC Bank Ltd.|84.25|14275.26
+2024-Aug|25|Karur Vysya Bank|68.6|13701.2
